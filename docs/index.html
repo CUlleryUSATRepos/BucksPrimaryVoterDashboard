@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bucks Primary Voter Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 28px 36px;
+    }
+
+    header h1 {
+      margin: 0 0 8px 0;
+      font-size: 32px;
+    }
+
+    header p {
+      margin: 0;
+      color: #d1d5db;
+      font-size: 16px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #4b5563;
+    }
+
+    .big-number {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    .dashboard-img {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .summary-list {
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .source-list {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #4b5563;
+    }
+
+    .map-tile {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .map-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: sticky;
+      top: 14px;
+    }
+
+    .map-button {
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: #111827;
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .map-button:hover {
+      background: #eef2ff;
+    }
+
+    .map-button.active {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    .map-display h3 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+    }
+
+    .map-summary {
+      margin-top: 16px;
+      padding: 16px;
+      border-left: 5px solid #111827;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .map-summary p {
+      margin-top: 0;
+    }
+
+    .map-summary p:last-child {
+      margin-bottom: 0;
+    }
+
+    .dashboard-frame {
+      width: 100%;
+      height: 720px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: white;
+    }
+
+    iframe {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .summary-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .summary-tab-button {
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: #111827;
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .summary-tab-button:hover {
+      background: #eef2ff;
+    }
+
+    .summary-tab-button.active {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    .summary-tab-meta {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .summary-tab-list {
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .summary-tab-list li {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .map-tile {
+        grid-template-columns: 1fr;
+      }
+
+      .map-buttons {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .map-button {
+        flex: 1 1 160px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Bucks Primary Voter Dashboard</h1>
+    <p>Static dashboard generated from local CSV and GeoJSON source files.</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <div class="card">
+        <h2 id="total-geos-label">Total geographies</h2>
+        <p id="total-geos" class="big-number">—</p>
+      </div>
+
+      <div class="card">
+        <h2>Total voters</h2>
+        <p id="total-voters" class="big-number">—</p>
+      </div>
+
+      <div class="card">
+        <h2>Competitive areas</h2>
+        <p id="competitive-count" class="big-number">—</p>
+      </div>
+
+      <div class="card">
+        <h2>Party switchers</h2>
+        <p id="party-switchers" class="big-number">—</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2>Registration map views</h2>
+
+      <div class="map-tile">
+        <div id="map-buttons" class="map-buttons"></div>
+
+        <div class="map-display">
+          <h3 id="map-title">Loading map...</h3>
+          <iframe id="map-frame" src="" title="" class="dashboard-frame" loading="lazy"></iframe>
+          <div id="map-summary" class="map-summary summary-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Weekly new registrations</h2>
+      <iframe
+        src="assets/weekly_registration_chart.html"
+        width="100%"
+        height="520"
+        loading="lazy">
+      </iframe>
+    </section>
+
+    <section class="section">
+      <h2>Cumulative new registrations</h2>
+      <iframe
+        src="assets/cumulative_registration_chart.html"
+        width="100%"
+        height="520"
+        loading="lazy">
+      </iframe>
+    </section>
+
+    <section class="section">
+      <h2>Party switcher summary</h2>
+      <div id="switcher-summary" class="summary-list"></div>
+    </section>
+
+
+    <section class="section">
+      <h2>Generated summaries</h2>
+      <div id="summary-tabs" class="summary-tabs"></div>
+      <div id="summary-tab-meta" class="summary-tab-meta"></div>
+      <ul id="summary-tab-content" class="summary-tab-list"></ul>
+    </section>
+
+    <section class="section">
+      <h2>Source files used</h2>
+      <div id="source-files" class="source-list"></div>
+    </section>
+  </main>
+
+  <script src="assets/dashboard-data.js"></script>
+  <script src="assets/summary-tabs.js"></script>
+
+  <script>
+    const data = window.DASHBOARD_DATA;
+
+    document.getElementById("total-geos-label").textContent = data.statCards.totalGeosLabel;
+    document.getElementById("total-geos").textContent = data.statCards.totalGeos;
+    document.getElementById("total-voters").textContent = data.statCards.totalVoters;
+    document.getElementById("competitive-count").textContent = data.statCards.competitiveCount;
+    document.getElementById("party-switchers").textContent = data.statCards.partySwitchers;
+    document.getElementById("switcher-summary").innerHTML = data.switcherSummaryHtml;
+
+    const sourceList = Object.entries(data.sourceFiles)
+      .map(([name, filename]) => `<li>${name}: ${filename}</li>`)
+      .join("");
+
+    document.getElementById("source-files").innerHTML = `<ul>${sourceList}</ul>`;
+
+    const buttonsContainer = document.getElementById("map-buttons");
+    const mapTitle = document.getElementById("map-title");
+    const mapFrame = document.getElementById("map-frame");
+    const mapSummary = document.getElementById("map-summary");
+
+    function setMapView(viewName) {
+      const view = data.mapViews[viewName];
+
+      mapTitle.textContent = view.title;
+      mapFrame.src = view.frame;
+      mapFrame.title = view.title;
+      mapSummary.innerHTML = view.summary;
+
+      document.querySelectorAll(".map-button").forEach(button => {
+        button.classList.toggle("active", button.dataset.mapView === viewName);
+      });
+    }
+
+    Object.entries(data.mapViews).forEach(([key, view], index) => {
+      const button = document.createElement("button");
+      button.className = "map-button";
+      button.dataset.mapView = key;
+      button.textContent = view.buttonLabel;
+      button.addEventListener("click", () => setMapView(key));
+      buttonsContainer.appendChild(button);
+
+      if (index === 0) {
+        button.classList.add("active");
+      }
+    });
+
+    setMapView(Object.keys(data.mapViews)[0]);
+
+    const summaryTabs = window.SUMMARY_TABS || [];
+    const summaryTabsContainer = document.getElementById("summary-tabs");
+    const summaryTabMeta = document.getElementById("summary-tab-meta");
+    const summaryTabContent = document.getElementById("summary-tab-content");
+
+    function setSummaryTab(tabKey) {
+      const tab = summaryTabs.find(item => item.key === tabKey);
+
+      if (!tab) {
+        return;
+      }
+
+      summaryTabMeta.textContent = `${tab.group} | Source: ${tab.file}`;
+      summaryTabContent.innerHTML = tab.sentences
+        .map(sentence => `<li>${sentence}</li>`)
+        .join("");
+
+      document.querySelectorAll(".summary-tab-button").forEach(button => {
+        button.classList.toggle("active", button.dataset.summaryTab === tabKey);
+      });
+    }
+
+    if (summaryTabs.length) {
+      summaryTabs.forEach((tab, index) => {
+        const button = document.createElement("button");
+        button.className = "summary-tab-button";
+        button.dataset.summaryTab = tab.key;
+        button.textContent = tab.title;
+        button.addEventListener("click", () => setSummaryTab(tab.key));
+        summaryTabsContainer.appendChild(button);
+
+        if (index === 0) {
+          button.classList.add("active");
+        }
+      });
+
+      setSummaryTab(summaryTabs[0].key);
+    } else if (summaryTabsContainer) {
+      summaryTabsContainer.innerHTML = "<p>No generated summaries were found.</p>";
+    }
+
+  </script>
+</body>
+</html>

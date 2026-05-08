@@ -1,0 +1,17 @@
+
+# Python / venv
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# keep source voter/dashboard data local
+dashboard_source/
+
+# one-time backups / patch scripts
+*_backup_*
+scripts/patch_*.py

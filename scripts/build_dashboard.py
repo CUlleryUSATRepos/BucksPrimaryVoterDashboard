@@ -10,6 +10,32 @@ import matplotlib.patches as mpatches
 import plotly.graph_objects as go
 
 
+
+def apply_street_basemap(fig, opacity=0.65):
+    """Use a light street basemap under Plotly precinct polygons."""
+    fig.update_layout(
+        map=dict(
+            style="carto-positron",
+            center=dict(lat=40.3286, lon=-75.1028),
+            zoom=8.5,
+        ),
+        mapbox=dict(
+            style="carto-positron",
+            center=dict(lat=40.3286, lon=-75.1028),
+            zoom=8.5,
+        ),
+    )
+
+    fig.update_traces(
+        marker_opacity=opacity,
+        selector=dict(type="choroplethmap"),
+    )
+    fig.update_traces(
+        marker_opacity=opacity,
+        selector=dict(type="choroplethmapbox"),
+    )
+
+    return fig
 # =========================
 # PATHS
 # =========================
@@ -216,6 +242,9 @@ def save_geography_map(
 
     geojson = json.loads(gdf.to_json())
 
+    center_lat = 40.3286
+    center_lon = -75.1028
+
     fig = go.Figure()
 
     for category in DVR_LABELS:
@@ -227,7 +256,7 @@ def save_geography_map(
         color = DVR_COLORS[category]
 
         fig.add_trace(
-            go.Choropleth(
+            go.Choroplethmap(
                 geojson=geojson,
                 locations=subset["_map_id"],
                 z=[1] * len(subset),
@@ -245,7 +274,7 @@ def save_geography_map(
     no_data = gdf[gdf["DvR_category"].isna()].copy()
     if not no_data.empty:
         fig.add_trace(
-            go.Choropleth(
+            go.Choroplethmap(
                 geojson=geojson,
                 locations=no_data["_map_id"],
                 z=[1] * len(no_data),
@@ -260,10 +289,6 @@ def save_geography_map(
             )
         )
 
-    fig.update_geos(
-        fitbounds="locations",
-        visible=False,
-    )
 
     fig.update_layout(
         title={
@@ -286,6 +311,7 @@ def save_geography_map(
     )
 
     out_path = ASSETS_DIR / Path(output_name).with_suffix(".html").name
+    fig = apply_street_basemap(fig)
     fig.write_html(out_path, include_plotlyjs="cdn", full_html=True)
 
     print(f"Saved interactive map: {out_path}")
